@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+*.local
+.claude/
+
+# Ảnh gốc ở root (đã copy vào public/assets/)
+Image.png
+Layer 0.png
+Painting.png
+white-paper-texture.jpg

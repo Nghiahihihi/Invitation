@@ -1,0 +1,842 @@
+/* ===========================
+   VARIABLES & RESET
+=========================== */
+:root {
+  --ink:        #043D32;
+  --ink-light:  #0a5c4a;
+  --ink-muted:  #1a7a60;
+  --paper:      #f5efe6;
+  --paper-warm: #ede4d6;
+  --cream:      #faf6ef;
+  --aurora-1:   #7fffd4;
+  --aurora-2:   #a78bfa;
+  --aurora-3:   #f472b6;
+  --text-dark:  #1a1a1a;
+  --text-mid:   #3a3a3a;
+
+  --font-hand:  'Lora', serif;
+  --font-body:  'Lora', serif;
+
+  --radius-portal: 50%;
+  --shadow-deboss: inset 1px 2px 4px rgba(0,0,0,0.35), inset -1px -1px 2px rgba(255,255,255,0.06);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* GSAP handles scrolling */
+}
+
+body {
+  background: transparent;
+  font-family: var(--font-hand);
+  color: var(--text-dark);
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+/* ===========================
+   AURORA BLOBS — ambient glow
+=========================== */
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.aurora-blob--1 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, var(--aurora-1) 0%, transparent 70%);
+  top: -10%; left: -8%;
+}
+.aurora-blob--2 {
+  width: 440px; height: 440px;
+  background: radial-gradient(circle, var(--aurora-2) 0%, transparent 70%);
+  top: 20%; right: -5%;
+}
+.aurora-blob--3 {
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, var(--aurora-3) 0%, transparent 70%);
+  bottom: 5%; left: 30%;
+}
+
+/* ===========================
+   TRANG 0 — LETTER
+=========================== */
+.page--letter {
+  position: relative;
+  min-height: 100vh;
+  z-index: 30;
+  overflow: hidden;
+  background: var(--ink);
+  align-items: center;
+  padding: 80px 20px;
+}
+
+.letter__sheet {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+  padding: 64px 72px 72px;
+}
+
+.letter__salutation {
+  font-family: var(--font-hand);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(16px);
+  line-height: 1.2;
+}
+
+.letter__line {
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  line-height: 1.8;
+  color: var(--text-mid);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.letter__sig {
+  font-family: var(--font-hand);
+  font-size: 1.4rem;
+  color: var(--ink-muted);
+  margin-top: 28px;
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.letter__scroll-cue {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(4,61,50,0.4);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: var(--font-hand);
+  animation: cueFloat 2.5s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+/* ===========================
+   NOISE TEXTURE OVERLAY
+=========================== */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+}
+
+/* ===========================
+   SCROLL WRAPPER — giờ chỉ là container
+=========================== */
+.scroll-wrapper {
+  position: relative;
+}
+
+/* ===========================
+   PAGE BASE — fixed, full screen
+=========================== */
+.page {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;          /* JS set display:flex khi active */
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  overflow: hidden;
+  will-change: opacity, transform;
+}
+
+.page.is-active {
+  display: flex;
+}
+
+/* ===========================
+   PAGE NAV — fixed bottom center
+=========================== */
+.page-nav {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(4,61,50,0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 40px;
+  padding: 8px 16px;
+}
+
+.nav-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s, opacity 0.3s;
+  border: none;
+  font-family: inherit;
+}
+.nav-arrow:hover { color: #fff; }
+
+.nav-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.nav-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.25s;
+  padding: 0;
+}
+.nav-dot.is-active {
+  background: #fff;
+  transform: scale(1.4);
+}
+
+/* ===========================
+   PAPER SHEET BASE
+   — tất cả trang cùng khổ ngang 900px
+=========================== */
+.paper-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  background: var(--paper);
+  border-radius: 4px 4px 0 0;
+  padding: 60px 64px 80px;
+
+  /* Đổ bóng nhẹ dưới giấy */
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Mép giấy cuộn (trang dưới tờ trên) */
+.paper-sheet::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 100%);
+  border-radius: 4px 4px 0 0;
+}
+
+/* ===========================
+   PAPER CURL (scroll cue dưới)
+=========================== */
+.paper-curl {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  pointer-events: none;
+}
+.paper-curl::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.08) 60%, rgba(0,0,0,0.18) 100%);
+  border-radius: 0 0 50% 50% / 0 0 12px 12px;
+}
+
+/* ===========================
+   TRANG 1 — BÌA
+=========================== */
+.page--cover {
+  padding: 0;
+  background: transparent;
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* Layer0 — full cover */
+.cover__mask-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  pointer-events: none;
+}
+
+/* Lớp overlay chứa text — absolute trong page--cover */
+.cover__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Scroll cue */
+.cover__scroll-cue {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: var(--font-hand);
+  animation: cueFloat 2.5s ease-in-out infinite;
+  white-space: nowrap;
+  pointer-events: none;
+}
+@keyframes cueFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0);   opacity: 0.4; }
+  50%       { transform: translateX(-50%) translateY(7px); opacity: 0.75; }
+}
+.scroll-cue__arrow {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+}
+
+/*
+  Vị trí 2 text box — chỉnh --x (% từ trái) và --y (% từ trên) để di chuyển.
+*/
+.cover__to {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+}
+.cover__to-label {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: 0.875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 4px;
+}
+.cover__to-name {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.cover__title {
+  position: absolute;
+  bottom: 14%;
+  left: 10%;
+  font-family: var(--font-hand);
+  font-size: clamp(0.85rem, 2vw, 1.6rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+}
+
+/* Lời mời đè lên ảnh bìa — căn trái thẳng hàng */
+.cover__letter {
+  position: absolute;
+  left: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: left;
+  max-width: 340px;
+  pointer-events: none;
+}
+.cover__letter-salutation {
+  font-family: var(--font-hand);
+  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.5);
+  margin-bottom: 10px;
+}
+.cover__letter-body {
+  font-family: var(--font-hand);
+  font-size: clamp(0.85rem, 1.8vw, 1.2rem);
+  font-weight: 400;
+  color: rgba(255,255,255,0.82);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+  line-height: 1.7;
+}
+
+/* ===========================
+   TRANG 2 — TRANH SÁP — fixed background, luôn hiện
+=========================== */
+.page--painting {
+  position: fixed;
+  inset: 0;
+  display: flex !important;   /* override .page { display:none } */
+  padding: 0;
+  z-index: 0;
+  background: var(--ink);
+}
+
+.painting__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
+
+/* Spacer để các trang sau không chồng lên tranh */
+.painting-spacer {
+  height: 100vh;
+  display: block;
+}
+
+/* Trang ngắm tranh — 100vh trống, background Painting hiện ra */
+.painting-view {
+  height: 100vh;
+  position: relative;
+  z-index: 20;
+  background: linear-gradient(to bottom, transparent 60%, var(--ink) 100%);
+}
+
+/* ===========================
+   TRANG 3 — POSTER
+=========================== */
+.page--poster {
+  background: transparent;
+  padding: 24px 20px 90px;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+/* Card chính — ảnh nền + content đè lên */
+.poster__card {
+  position: relative;
+  width: min(600px, 92vw);
+  max-height: calc(100vh - 120px);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.55),
+    0 4px 16px rgba(0,0,0,0.3);
+}
+
+.poster__bg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 120px);
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Gradient overlay — trong suốt ở trên, đặc ở dưới */
+.poster__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(4,61,50,0.08) 0%,
+    rgba(4,61,50,0.15) 40%,
+    rgba(4,61,50,0.82) 70%,
+    rgba(4,61,50,0.97) 100%
+  );
+}
+
+/* Content đặt ở phần dưới card */
+.poster__content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 36px 40px 44px;
+  color: #fff;
+}
+
+.poster__label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgba(255,255,255,0.6);
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.poster__event {
+  font-family: var(--font-hand);
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.poster__name {
+  font-family: var(--font-hand);
+  font-size: clamp(2rem, 5.5vw, 3rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.poster__divider {
+  width: 40px;
+  height: 1px;
+  background: rgba(255,255,255,0.35);
+  margin: 18px 0 16px;
+}
+
+.poster__details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.poster__detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.poster__detail-icon {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.poster__detail-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: rgba(255,255,255,0.85);
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.poster__detail-text strong {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ===========================
+   TRANG 4 — RSVP
+=========================== */
+.page--rsvp {
+  background: transparent;
+  padding: 40px 20px 100px;
+  align-items: flex-start;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.paper-sheet--rsvp {
+  padding: 60px 64px 80px;
+}
+
+.rsvp__inner {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.rsvp__guest-name {
+  font-family: var(--font-hand);
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 600;
+  color: var(--ink);
+  font-style: italic;
+  margin-bottom: 24px;
+}
+
+.rsvp__heading {
+  font-family: var(--font-hand);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.rsvp__sub {
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  margin-bottom: 36px;
+}
+
+.rsvp__form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rsvp__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rsvp__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.rsvp__optional {
+  font-weight: 300;
+  opacity: 0.6;
+  text-transform: none;
+}
+
+/* Input styled như dòng kẻ giấy */
+.rsvp__input,
+.rsvp__textarea {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(4,61,50,0.3);
+  border-radius: 0;
+  padding: 8px 0;
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.rsvp__input:focus,
+.rsvp__textarea:focus {
+  border-bottom-color: var(--ink);
+}
+.rsvp__input:focus-visible,
+.rsvp__textarea:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.rsvp__input::placeholder,
+.rsvp__textarea::placeholder {
+  color: rgba(0,0,0,0.25);
+}
+
+.rsvp__input--number {
+  width: 80px;
+}
+
+.rsvp__textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Toggle yes/no */
+.rsvp__toggle-group {
+  display: flex;
+  gap: 10px;
+}
+
+.rsvp__toggle {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1.5px solid rgba(4,61,50,0.3);
+  border-radius: 40px;
+  font-family: var(--font-hand);
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: transparent;
+  transition: all 0.2s;
+}
+.rsvp__toggle:hover {
+  border-color: var(--ink);
+  background: rgba(4,61,50,0.06);
+}
+.rsvp__toggle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.rsvp__toggle[aria-pressed="true"],
+.rsvp__toggle.is-active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* Submit — dấu sáp seal */
+.rsvp__submit {
+  align-self: center;
+  margin-top: 8px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(4,61,50,0.35), inset 0 1px 2px rgba(255,255,255,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  animation: sealPulse 2.8s ease-in-out infinite;
+}
+@keyframes sealPulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(4,61,50,0.35), inset 0 1px 2px rgba(255,255,255,0.1), 0 0 0 0 rgba(4,61,50,0); }
+  50%       { box-shadow: 0 4px 16px rgba(4,61,50,0.35), inset 0 1px 2px rgba(255,255,255,0.1), 0 0 0 12px rgba(4,61,50,0); }
+  60%       { box-shadow: 0 4px 16px rgba(4,61,50,0.35), inset 0 1px 2px rgba(255,255,255,0.1), 0 0 0 14px rgba(4,61,50,0.12); }
+  80%       { box-shadow: 0 4px 16px rgba(4,61,50,0.35), inset 0 1px 2px rgba(255,255,255,0.1), 0 0 0 22px rgba(4,61,50,0); }
+}
+.rsvp__submit::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.rsvp__submit:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 24px rgba(4,61,50,0.45);
+  animation: none;
+}
+.rsvp__submit:active {
+  transform: scale(0.97);
+}
+.rsvp__submit:focus-visible {
+  outline: 3px solid var(--aurora-2);
+  outline-offset: 4px;
+}
+
+/* Success / error states */
+.rsvp__success,
+.rsvp__error {
+  text-align: center;
+  padding: 32px 0;
+}
+.rsvp__seal {
+  font-size: 3rem;
+  color: var(--ink);
+  margin-bottom: 12px;
+  animation: sealPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes sealPop {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+}
+.rsvp__success-text {
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+.rsvp__error {
+  color: #c0392b;
+  font-size: 0.9rem;
+}
+
+/* ===========================
+   GSAP INIT STATES (hidden before animate)
+=========================== */
+.page--painting .paper-sheet,
+.page--poster .paper-sheet,
+.page--rsvp .paper-sheet {
+  will-change: transform, opacity;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+@media (max-width: 600px) {
+  .paper-sheet {
+    padding: 48px 24px 60px;
+  }
+  .letter__sheet {
+    padding: 48px 24px 64px;
+  }
+  .letter__salutation {
+    font-size: 1.6rem;
+  }
+
+  /* Cover: giữ object-position sao cho vòng tròn giữ vị trí đúng.
+     Ảnh 1655×950. Trên portrait scale theo height → displayed width ~1470px.
+     Vòng tròn ở ~x=850px gốc → scaled x=755px.
+     object-position x% = (755 - 195) / (1470 - 390) * 100 = 52% */
+  .cover__mask-layer {
+    object-position: 50% center;
+  }
+
+  .painting__img {
+    object-position: 50% center;
+  }
+
+  /* Lời mời trên mobile — kéo lên cao hơn tránh đè lên vòng tròn */
+  .cover__letter {
+    left: 6%;
+    top: 30%;
+    transform: none;
+    text-align: left;
+    max-width: 55%;
+  }
+
+  /* "Graduation Invitation" kéo lên chút cho portrait */
+  .cover__title {
+    bottom: 10%;
+    font-size: 0.75rem;
+  }
+
+  .poster__card {
+    width: min(440px, 88vw);
+  }
+  .rsvp__toggle-group {
+    flex-direction: column;
+  }
+}

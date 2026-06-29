@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thiệp Tốt Nghiệp — Bùi Thị Thảo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!-- Noise texture overlay toàn trang -->
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <div class="scroll-wrapper">
+
+    <!-- ===== TRANG 1: BÌA ===== -->
+    <section class="page page--cover" id="page-cover">
+      <img src="/assets/Layer0.png" alt="" class="cover__mask-layer" aria-hidden="true" />
+
+      <!-- Aurora blobs trên cover -->
+      <div class="aurora-blob aurora-blob--1" aria-hidden="true"></div>
+      <div class="aurora-blob aurora-blob--2" aria-hidden="true"></div>
+      <div class="aurora-blob aurora-blob--3" aria-hidden="true"></div>
+
+      <!-- Text overlay đè lên ảnh -->
+      <div class="cover__overlay">
+        <div class="cover__to" id="cover-to">
+          <span class="cover__to-label">Gửi</span>
+          <span class="cover__to-name" id="cover-recipient">Họ Tên</span>
+        </div>
+
+        <div class="cover__letter" id="cover-letter">
+          <p class="cover__letter-salutation">Dear my beloved friend,</p>
+          <p class="cover__letter-body">please come, thanks... :))))</p>
+        </div>
+
+        <div class="cover__title" id="cover-title">
+          Graduation Invitation
+        </div>
+
+        <div class="cover__scroll-cue">
+          <span>cuộn xuống</span>
+          <div class="scroll-cue__arrow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TRANG 2: TRANH SÁP MÀU (fixed làm nền) ===== -->
+    <section class="page page--painting" id="page-painting">
+      <img
+        src="/assets/Painting.png"
+        alt="Tranh sáp màu: Thảo và Miu dưới cực quang"
+        class="painting__img"
+      />
+    </section>
+
+    <!-- ===== TRANG 3: POSTER ===== -->
+    <section class="page page--poster" id="page-poster">
+      <div class="poster__card">
+        <!-- Ảnh nền full -->
+        <img src="/assets/Image.png" alt="Bùi Thảo" class="poster__bg" />
+        <!-- Overlay gradient -->
+        <div class="poster__overlay" aria-hidden="true"></div>
+        <!-- Nội dung -->
+        <div class="poster__content">
+          <p class="poster__label">You are cordially invited to</p>
+          <h2 class="poster__event">Graduation Ceremony</h2>
+          <h3 class="poster__name">Bùi Thảo</h3>
+          <div class="poster__divider" aria-hidden="true"></div>
+          <div class="poster__details">
+            <div class="poster__detail-row">
+              <span class="poster__detail-icon">◎</span>
+              <span class="poster__detail-text"><strong>Date</strong>Friday — July 3rd, 2026</span>
+            </div>
+            <div class="poster__detail-row">
+              <span class="poster__detail-icon">◎</span>
+              <span class="poster__detail-text"><strong>Time</strong>9:00 — 11:00 AM</span>
+            </div>
+            <div class="poster__detail-row">
+              <span class="poster__detail-icon">◎</span>
+              <span class="poster__detail-text"><strong>Venue</strong>Building A1, Hanoi University</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TRANG 4: RSVP ===== -->
+    <section class="page page--rsvp" id="page-rsvp">
+      <div class="paper-sheet paper-sheet--rsvp">
+        <div class="rsvp__inner">
+          <h2 class="rsvp__heading">Will you be there?</h2>
+          <p class="rsvp__sub">Let me know so I can save you a spot ♡</p>
+
+          <form class="rsvp__form" id="rsvp-form" novalidate>
+            <p class="rsvp__guest-name" id="rsvp-display-name"></p>
+
+            <div class="rsvp__field">
+              <label class="rsvp__label">Are you coming?</label>
+              <div class="rsvp__toggle-group" role="group" aria-label="Confirm attendance">
+                <button type="button" class="rsvp__toggle rsvp__toggle--yes" data-value="yes" aria-pressed="false">Yes, I'll be there!</button>
+                <button type="button" class="rsvp__toggle rsvp__toggle--no"  data-value="no"  aria-pressed="false">Sorry, I can't make it</button>
+              </div>
+              <input type="hidden" id="rsvp-attending" name="attending" value="" />
+            </div>
+
+            <button type="submit" class="rsvp__submit" id="rsvp-submit">
+              <span class="rsvp__submit-text">Send ♡</span>
+              <span class="rsvp__submit-loading" hidden>Sending...</span>
+            </button>
+          </form>
+
+          <div class="rsvp__success" id="rsvp-success" hidden>
+            <div class="rsvp__seal" aria-hidden="true">✦</div>
+            <p class="rsvp__success-text">Thank you! I got your reply ♡</p>
+          </div>
+
+          <div class="rsvp__error" id="rsvp-error" hidden>
+            <p>Something went wrong, please try again.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- end .scroll-wrapper -->
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
