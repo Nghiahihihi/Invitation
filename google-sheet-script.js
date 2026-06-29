@@ -1,45 +1,65 @@
-/**
- * Google Apps Script — dán vào Extensions > Apps Script trong Google Sheet
- *
- * Cấu trúc sheet:
- *   Cột A: Người gửi (tên bạn bè / mối quan hệ, để bạn biết gửi cho ai)
- *   Cột B: Tên hiện trên thiệp (ví dụ: Nguyễn Văn An)
- *   Cột C: Link (script tự điền)
- *
- * Cách dùng:
- *   1. Mở Google Sheet, vào Extensions > Apps Script
- *   2. Paste toàn bộ file này vào, Save
- *   3. Chạy generateLinks() một lần để điền cột C
- *   4. Mỗi lần thêm khách mới, chạy lại — chỉ điền những dòng chưa có link
- */
+const SITE_URL   = 'https://invitation-tau-vert.vercel.app'
+const SHEET_NAME = 'Sheet1'
 
-const SITE_URL = 'https://your-site.com' // ← đổi thành domain thật sau khi deploy
-const SHEET_NAME = 'Sheet1'              // ← đổi nếu tên sheet khác
-
+// ── Tạo link cho cột C ───────────────────────────
 function generateLinks() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME)
+  const sheet   = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME)
   const lastRow = sheet.getLastRow()
 
-  for (let row = 2; row <= lastRow; row++) { // bắt đầu từ dòng 2 (dòng 1 là header)
+  for (let row = 2; row <= lastRow; row++) {
     const name = sheet.getRange(row, 2).getValue().toString().trim()
     if (!name) continue
-
-    // Chỉ điền nếu cột C chưa có link
     const existing = sheet.getRange(row, 3).getValue()
     if (existing) continue
 
     const encoded = Utilities.base64Encode(name, Utilities.Charset.UTF_8)
-    const link = `${SITE_URL}/#${encoded}`
+    const link    = `${SITE_URL}/#${encoded}`
     sheet.getRange(row, 3).setValue(link)
   }
 
-  SpreadsheetApp.getUi().alert('Xong! Cột C đã được điền link.')
+  SpreadsheetApp.getUi().alert('Xong! Cot C da duoc dien link.')
 }
 
-// Thêm menu "Thiệp" vào Google Sheet cho tiện
+// ── Nhận RSVP → ghi vào cột D E F G ────────────────────
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME)
+
+  // Ghi header D1:G1 nếu chưa có
+  if (!sheet.getRange(1, 4).getValue()) {
+    sheet.getRange(1, 4, 1, 4).setValues([['Ten (RSVP)', 'Link goc', 'Co den?', 'Thoi gian']])
+  }
+
+  const data = JSON.parse(e.postData.contents)
+  const name = data.name || ''
+
+  // Tìm dòng khớp tên trong cột B để lấy link cột C
+  const lastRow = sheet.getLastRow()
+  let matchRow  = -1
+  for (let r = 2; r <= lastRow; r++) {
+    if (sheet.getRange(r, 2).getValue().toString().trim() === name) {
+      matchRow = r
+      break
+    }
+  }
+  const link = matchRow > 0 ? sheet.getRange(matchRow, 3).getValue() : ''
+
+  // Ghi vào cột D E F G — tìm hàng trống đầu tiên từ D2
+  let writeRow = 2
+  while (sheet.getRange(writeRow, 4).getValue() !== '') writeRow++
+
+  sheet.getRange(writeRow, 4, 1, 4).setValues([[
+    name,
+    link,
+    data.attending === 'yes' ? 'Co den' : 'Khong den',
+    new Date(data.timestamp).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+  ]])
+
+  return ContentService.createTextOutput('ok')
+}
+
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu('Thiệp')
+    .createMenu('Thiep')
     .addItem('Generate links', 'generateLinks')
     .addToUi()
 }
