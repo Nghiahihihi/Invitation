@@ -9,7 +9,9 @@ export function initCover() {
   const recipient = document.getElementById('cover-recipient')
   if (recipient && hash) {
     try {
-      recipient.textContent = decodeURIComponent(atob(hash))
+      // atob cho ra Latin-1 bytes — cần decode lại đúng UTF-8
+      const bytes = Uint8Array.from(atob(hash), c => c.charCodeAt(0))
+      recipient.textContent = new TextDecoder('utf-8').decode(bytes)
     } catch {
       // hash không hợp lệ — giữ nguyên placeholder
     }

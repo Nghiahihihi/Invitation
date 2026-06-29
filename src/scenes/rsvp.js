@@ -48,7 +48,7 @@ export function initRsvp() {
     if (errorEl) errorEl.hidden = true
 
     const payload = {
-      name: btoa(unescape(encodeURIComponent(name))),  // base64 UTF-8
+      name: btoa(String.fromCharCode(...new TextEncoder().encode(name))),  // UTF-8 → base64
       attending,
       timestamp: new Date().toISOString()
     }
