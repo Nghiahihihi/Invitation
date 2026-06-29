@@ -47,7 +47,11 @@ export function initRsvp() {
     submitBtn.querySelector('.rsvp__submit-loading').hidden = false
     if (errorEl) errorEl.hidden = true
 
-    const payload = { name, attending, timestamp: new Date().toISOString() }
+    const payload = {
+      name: btoa(unescape(encodeURIComponent(name))),  // base64 UTF-8
+      attending,
+      timestamp: new Date().toISOString()
+    }
 
     try {
       if (!RSVP_SCRIPT_URL) {
