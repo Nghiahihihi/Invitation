@@ -137,6 +137,49 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 /* ===========================
+   SPLASH SCREEN
+=========================== */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.splash.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.splash__inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+}
+.splash__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: rgba(255,255,255,0.7);
+  animation: splashSpin 1s linear infinite;
+}
+.splash__text {
+  color: rgba(255,255,255,0.5);
+  font-size: 1.2rem;
+  font-family: var(--font-hand);
+}
+@keyframes splashSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===========================
    NOISE TEXTURE OVERLAY
 =========================== */
 .noise-overlay {

@@ -190,6 +190,10 @@ function initSwipe() {
 // ── Init ──────────────────────────────────────────────────────────
 function init() {
   document.fonts.ready.then(() => {
+    // Dismiss splash
+    const splash = document.getElementById('splash')
+    if (splash) splash.classList.add('is-hidden')
+
     PAGE_IDS.forEach((id, i) => {
       const el = document.getElementById(id)
       if (!el) return
